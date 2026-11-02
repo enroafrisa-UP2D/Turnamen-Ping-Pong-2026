@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenis Meja Ganda UP2D HLN ke 81</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #f8fafc;
+            color: #0f172a;
+            display: flex;
+            flex-direction: column;
+            padding: 1.2vh 1.5vw;
+        }
+
+        /* Header Ringkas */
+        .header-container {
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 0.8vh 1.2vw;
+            margin-bottom: 1vh;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .header-title-box h1 {
+            color: #1e3a8a;
+            font-size: 1.8vh;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+
+        .meta-info {
+            font-size: 1.3vh;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .rules-info {
+            background-color: #f1f5f9;
+            padding: 0.5vh 0.8vw;
+            border-radius: 4px;
+            font-size: 1.2vh;
+            color: #334155;
+            border-left: 3px solid #0284c7;
+            max-width: 50%;
+        }
+
+        /* Bracket Wrapper 16:9 */
+        .bracket-wrapper {
+            position: relative;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1vh 1vw;
+            flex-grow: 1;
+            display: flex;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        #svg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .bracket-grid {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            height: 100%;
+            gap: 1.8vw;
+            position: relative;
+            z-index: 2;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex: 1;
+            height: 100%;
+        }
+
+        .column-header {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.3vh;
+            color: #ffffff;
+            padding: 0.6vh 0.4vw;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .col-r1 .column-header { background: linear-gradient(135deg, #0284c7, #2563eb); }
+        .col-qf .column-header { background: linear-gradient(135deg, #7c3aed, #9333ea); }
+        .col-sf .column-header { background: linear-gradient(135deg, #ea580c, #d97706); }
+        .col-f  .column-header { background: linear-gradient(135deg, #059669, #10b981); }
+        .col-w  .column-header { background: linear-gradient(135deg, #eab308, #ca8a04); }
+
+        /* Match Box Compact */
+        .match-card {
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .team-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.4vh 0.5vw;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 1.15vh;
+        }
+
+        .team-row:last-child {
+            border-bottom: none;
+        }
+
+        .team-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding-right: 4px;
+            line-height: 1.1;
+        }
+
+        .team-tag {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 1.1vh;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .player-names {
+            color: #475569;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 1.05vh;
+        }
+
+        .score-input {
+            width: 2.2vw;
+            height: 2.2vh;
+            border: 1px solid #94a3b8;
+            border-radius: 3px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2vh;
+            outline: none;
+            background: #f8fafc;
+            color: #0f172a;
+            flex-shrink: 0;
+        }
+
+        .score-input:focus {
+            border-color: #0284c7;
+            background: #ffffff;
+        }
+
+        /* BYE Card */
+        .bye-card {
+            background-color: #fefce8;
+            border-color: #fde047;
+        }
+        .bye-card .team-tag { color: #854d0e; }
+
+        /* Perebutan Juara 3 Box */
+        .rank3-card {
+            border: 1.5px solid #0284c7;
+            background: #f0f9ff;
+        }
+
+        /* Juara Column Box */
+        .winner-box-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1vh;
+            margin: auto 0;
+        }
+
+        .champion-card {
+            border-radius: 6px;
+            text-align: center;
+            padding: 0.8vh 0.5vw;
+        }
+
+        .gold-card {
+            background: linear-gradient(135deg, #fef9c3, #fef08a);
+            border: 2px solid #eab308;
+        }
+
+        .silver-card {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            border: 2px solid #94a3b8;
+        }
+
+        .bronze-card {
+            background: linear-gradient(135deg, #ffedd5, #fed7aa);
+            border: 2px solid #f97316;
+        }
+
+        .champion-title {
+            font-size: 1.2vh;
+            font-weight: 800;
+            margin-bottom: 0.2vh;
+        }
+
+        .gold-card .champion-title { color: #854d0e; }
+        .silver-card .champion-title { color: #334155; }
+        .bronze-card .champion-title { color: #9a3412; }
+
+        .champion-name {
+            font-size: 1.1vh;
+            font-weight: 700;
+            color: #0f172a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            margin-top: 0.8vh;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .save-indicator {
+            margin-right: auto;
+            font-size: 1.2vh;
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 0.5vh 1vw;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 1.2vh;
+            cursor: pointer;
+        }
+
+        .btn-print { background-color: #0284c7; color: white; }
+        .btn-reset { background-color: #ef4444; color: white; }
+
+        @media print {
+            .action-bar { display: none; }
+            html, body { height: auto; overflow: visible; }
+            .bracket-wrapper { border: none; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <div class="header-title-box">
+            <h1>Tenis Meja Ganda UP2D HLN ke 81</h1>
+            <div class="meta-info">Selasa, 3 November 2026 • Pukul 08:00 WIB • AULA UP2D</div>
+        </div>
+        <div class="rules-info">
+            <strong>Ketentuan:</strong> 28 peserta diacak jadi 14 pasangan tetap • Sistem gugur • 6 match awal & 2 BYE.
+        </div>
+    </div>
+
+    <div class="bracket-wrapper" id="bracket-wrapper">
+        <svg id="svg-canvas"></svg>
+
+        <div class="bracket-grid">
+            
+            <!-- BABAK AWAL / 16 BESAR -->
+            <div class="column col-r1">
+                <div class="column-header">BABAK AWAL / 16 BESAR</div>
+
+                <div class="match-card bye-card" id="card-A0">
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 01</span>
+                            <span class="player-names">RIKI ARDIYANTO / Idris</span>
+                        </div>
+                    </div>
+                    <div class="team-row" style="background: #fef9c3;">
+                        <span class="team-tag" style="color: #a16207;">BYE (Lolos Otomatis)</span>
+                    </div>
+                </div>
+
+                <div class="match-card" id="card-A1">
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 02</span>
+                            <span class="player-names">HARIYANTO / SYARIF M. KAMALUZAMAN</span>
+                        </div>
+                        <input type="number" class="score-input" id="score-A1-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 03</span>
+                            <span class="player-names">Sapurdi / Kho_Meng</span>
+                        </div>
+                        <input type="number" class="score-input" id="score-A1-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+
+                <div class="match-card" id="card-A2">
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 04</span>
+                            <span class="player-names">Ilham / Sunan</span>
+                        </div>
+                        <input type="number" class="score-input" id="score-A2-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 05</span>
+                            <span class="player-names">Ria norsan / Teguh Setiawan</span>
+                        </div>
+                        <input type="number" class="score-input" id="score-A2-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+
+                <div class="match-card" id="card-A3">
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 06</span>
+                            <span class="player-names">Ude heri / Edo subarda</span>
+                        </div>
+                        <input type="number" class="score-input" id="score-A3-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 07</span>
+                            <span class="player-names">GEGOT / Verdong</span>
+                        </div>
+                        <input type="number" class="score-input" id="score-A3-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+
+                <div class="match-card" id="card-A4">
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 08</span>
+                            <span class="player-names">Irsang / Shabrun Dzaki</span>
+                        </div>
+                        <input type="number" class="score-input" id="score-A4-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 09</span>
+                            <span class="player-names">Hendra Lesmana / EKO SAPUTRA</span>
+                        </div>
+                        <input type="number" class="score-input" id="score-A4-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+
+                <div class="match-card" id="card-A5">
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 10</span>
+                            <span class="player-names">Mian / Hani</span>
+                        </div>
+                        <input type="number" class="score-input" id="score-A5-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 11</span>
+                            <span class="player-names">Aa Joend / RIO NURCAHYO</span>
+                        </div>
+                        <input type="number" class="score-input" id="score-A5-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+
+                <div class="match-card" id="card-A6">
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 12</span>
+                            <span class="player-names">Ajar / Haris Hijazi</span>
+                        </div>
+                        <input type="number" class="score-input" id="score-A6-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 13</span>
+                            <span class="player-names">Tya / Mirza</span>
+                        </div>
+                        <input type="number" class="score-input" id="score-A6-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+
+                <div class="match-card bye-card" id="card-A7">
+                    <div class="team-row">
+                        <div class="team-info">
+                            <span class="team-tag">Tim 14</span>
+                            <span class="player-names">Teguh Priyanto / Prisma</span>
+                        </div>
+                    </div>
+                    <div class="team-row" style="background: #fef9c3;">
+                        <span class="team-tag" style="color: #a16207;">BYE (Lolos Otomatis)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PEREMPAT FINAL -->
+            <div class="column col-qf">
+                <div class="column-header">PEREMPAT FINAL</div>
+
+                <div class="match-card" id="card-B1">
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-B1-1">Tim 01: RIKI ARDIYANTO / Idris</span></div>
+                        <input type="number" class="score-input" id="score-B1-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-B1-2">Pemenang A1</span></div>
+                        <input type="number" class="score-input" id="score-B1-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+
+                <div class="match-card" id="card-B2">
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-B2-1">Pemenang A2</span></div>
+                        <input type="number" class="score-input" id="score-B2-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-B2-2">Pemenang A3</span></div>
+                        <input type="number" class="score-input" id="score-B2-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+
+                <div class="match-card" id="card-B3">
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-B3-1">Pemenang A4</span></div>
+                        <input type="number" class="score-input" id="score-B3-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-B3-2">Pemenang A5</span></div>
+                        <input type="number" class="score-input" id="score-B3-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+
+                <div class="match-card" id="card-B4">
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-B4-1">Pemenang A6</span></div>
+                        <input type="number" class="score-input" id="score-B4-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-B4-2">Tim 14: Teguh Priyanto / Prisma</span></div>
+                        <input type="number" class="score-input" id="score-B4-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEMIFINAL -->
+            <div class="column col-sf">
+                <div class="column-header">SEMIFINAL</div>
+
+                <div class="match-card" id="card-C1">
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-C1-1">Pemenang B1</span></div>
+                        <input type="number" class="score-input" id="score-C1-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-C1-2">Pemenang B2</span></div>
+                        <input type="number" class="score-input" id="score-C1-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+
+                <div class="match-card" id="card-C2">
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-C2-1">Pemenang B3</span></div>
+                        <input type="number" class="score-input" id="score-C2-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-C2-2">Pemenang B4</span></div>
+                        <input type="number" class="score-input" id="score-C2-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- FINAL & PEREBUTAN JUARA 3 -->
+            <div class="column col-f">
+                <div class="column-header">FINAL</div>
+
+                <!-- Match F1 (Final) -->
+                <div class="match-card" id="card-F1">
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-F1-1">Pemenang C1</span></div>
+                        <input type="number" class="score-input" id="score-F1-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-F1-2">Pemenang C2</span></div>
+                        <input type="number" class="score-input" id="score-F1-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+
+                <!-- Match R3 (Perebutan Juara 3) -->
+                <div class="match-card rank3-card" id="card-R3">
+                    <div class="team-row" style="background:#e0f2fe;">
+                        <span class="team-tag" style="color:#0369a1;">🥉 Perebutan Juara 3</span>
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-R3-1">Kalah SF 1</span></div>
+                        <input type="number" class="score-input" id="score-R3-1" oninput="handleScoreInput()">
+                    </div>
+                    <div class="team-row">
+                        <div class="team-info"><span class="team-tag" id="name-R3-2">Kalah SF 2</span></div>
+                        <input type="number" class="score-input" id="score-R3-2" oninput="handleScoreInput()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- HASIL JUARA -->
+            <div class="column col-w">
+                <div class="column-header">JUARA</div>
+
+                <div class="winner-box-container">
+                    <div class="champion-card gold-card" id="card-W1">
+                        <div class="champion-title">🥇 JUARA 1</div>
+                        <div class="champion-name" id="name-W1">Pemenang Final</div>
+                    </div>
+
+                    <div class="champion-card silver-card" id="card-W2">
+                        <div class="champion-title">🥈 JUARA 2</div>
+                        <div class="champion-name" id="name-W2">Runner-Up Final</div>
+                    </div>
+
+                    <div class="champion-card bronze-card" id="card-W3">
+                        <div class="champion-title">🥉 JUARA 3</div>
+                        <div class="champion-name" id="name-W3">Pemenang Match Juara 3</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <span class="save-indicator" id="save-status">💾 Tersimpan otomatis</span>
+        <button class="btn btn-reset" onclick="resetScores()">Reset Skor</button>
+        <button class="btn btn-print" onclick="window.print()">Cetak / PDF</button>
+    </div>
+
+    <script>
+        const teamsData = {
+            'A0-1': 'Tim 01: RIKI ARDIYANTO / Idris',
+            'A1-1': 'Tim 02: HARIYANTO / SYARIF M. KAMALUZAMAN',
+            'A1-2': 'Tim 03: Sapurdi / Kho_Meng',
+            'A2-1': 'Tim 04: Ilham / Sunan',
+            'A2-2': 'Tim 05: Ria norsan / Teguh Setiawan',
+            'A3-1': 'Tim 06: Ude heri / Edo subarda',
+            'A3-2': 'Tim 07: GEGOT / Verdong',
+            'A4-1': 'Tim 08: Irsang / Shabrun Dzaki',
+            'A4-2': 'Tim 09: Hendra Lesmana / EKO SAPUTRA',
+            'A5-1': 'Tim 10: Mian / Hani',
+            'A5-2': 'Tim 11: Aa Joend / RIO NURCAHYO',
+            'A6-1': 'Tim 12: Ajar / Haris Hijazi',
+            'A6-2': 'Tim 13: Tya / Mirza',
+            'A7-1': 'Tim 14: Teguh Priyanto / Prisma'
+        };
+
+        function saveToLocalStorage() {
+            const scores = {};
+            document.querySelectorAll('.score-input').forEach(input => {
+                scores[input.id] = input.value;
+            });
+            localStorage.setItem('pingpong_scores_up2d_2026', JSON.stringify(scores));
+            
+            const status = document.getElementById('save-status');
+            status.innerText = "💾 Tersimpan otomatis";
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('pingpong_scores_up2d_2026');
+            if (saved) {
+                const scores = JSON.parse(saved);
+                for (const [id, value] of Object.entries(scores)) {
+                    const input = document.getElementById(id);
+                    if (input) input.value = value;
+                }
+            }
+        }
+
+        const matchWinners = {};
+        const matchLosers = {};
+
+        function getMatchResult(matchId, team1Name, team2Name) {
+            const s1 = parseInt(document.getElementById(`score-${matchId}-1`)?.value);
+            const s2 = parseInt(document.getElementById(`score-${matchId}-2`)?.value);
+
+            if (!isNaN(s1) && !isNaN(s2)) {
+                if (s1 > s2) return { winner: team1Name, loser: team2Name };
+                if (s2 > s1) return { winner: team2Name, loser: team1Name };
+            }
+            return { winner: null, loser: null };
+        }
+
+        function updateBracket() {
+            // Babak Awal -> Perempat Final
+            ['A1','A2','A3','A4','A5','A6'].forEach(id => {
+                const res = getMatchResult(id, teamsData[`${id}-1`], teamsData[`${id}-2`]);
+                matchWinners[id] = res.winner;
+                matchLosers[id] = res.loser;
+            });
+
+            document.getElementById('name-B1-1').innerText = teamsData['A0-1'];
+            document.getElementById('name-B1-2').innerText = matchWinners['A1'] || 'Pemenang A1';
+            document.getElementById('name-B2-1').innerText = matchWinners['A2'] || 'Pemenang A2';
+            document.getElementById('name-B2-2').innerText = matchWinners['A3'] || 'Pemenang A3';
+            document.getElementById('name-B3-1').innerText = matchWinners['A4'] || 'Pemenang A4';
+            document.getElementById('name-B3-2').innerText = matchWinners['A5'] || 'Pemenang A5';
+            document.getElementById('name-B4-1').innerText = matchWinners['A6'] || 'Pemenang A6';
+            document.getElementById('name-B4-2').innerText = teamsData['A7-1'];
+
+            // QF -> Semifinal
+            const b1 = getMatchResult('B1', teamsData['A0-1'], matchWinners['A1'] || 'Pemenang A1');
+            const b2 = getMatchResult('B2', matchWinners['A2'] || 'Pemenang A2', matchWinners['A3'] || 'Pemenang A3');
+            const b3 = getMatchResult('B3', matchWinners['A4'] || 'Pemenang A4', matchWinners['A5'] || 'Pemenang A5');
+            const b4 = getMatchResult('B4', matchWinners['A6'] || 'Pemenang A6', teamsData['A7-1']);
+
+            matchWinners['B1'] = b1.winner; matchWinners['B2'] = b2.winner;
+            matchWinners['B3'] = b3.winner; matchWinners['B4'] = b4.winner;
+
+            document.getElementById('name-C1-1').innerText = matchWinners['B1'] || 'Pemenang B1';
+            document.getElementById('name-C1-2').innerText = matchWinners['B2'] || 'Pemenang B2';
+            document.getElementById('name-C2-1').innerText = matchWinners['B3'] || 'Pemenang B3';
+            document.getElementById('name-C2-2').innerText = matchWinners['B4'] || 'Pemenang B4';
+
+            // Semifinal -> Final & Perebutan Juara 3
+            const c1 = getMatchResult('C1', matchWinners['B1'] || 'Pemenang B1', matchWinners['B2'] || 'Pemenang B2');
+            const c2 = getMatchResult('C2', matchWinners['B3'] || 'Pemenang B3', matchWinners['B4'] || 'Pemenang B4');
+
+            matchWinners['C1'] = c1.winner; matchLosers['C1'] = c1.loser;
+            matchWinners['C2'] = c2.winner; matchLosers['C2'] = c2.loser;
+
+            document.getElementById('name-F1-1').innerText = matchWinners['C1'] || 'Pemenang C1';
+            document.getElementById('name-F1-2').innerText = matchWinners['C2'] || 'Pemenang C2';
+
+            document.getElementById('name-R3-1').innerText = matchLosers['C1'] || 'Kalah SF 1';
+            document.getElementById('name-R3-2').innerText = matchLosers['C2'] || 'Kalah SF 2';
+
+            // Final -> Juara 1 & Juara 2
+            const f1 = getMatchResult('F1', matchWinners['C1'] || 'Pemenang C1', matchWinners['C2'] || 'Pemenang C2');
+            document.getElementById('name-W1').innerText = f1.winner || 'Pemenang Final';
+            document.getElementById('name-W2').innerText = f1.loser || 'Runner-Up Final';
+
+            // Perebutan Juara 3 -> Juara 3
+            const r3 = getMatchResult('R3', matchLosers['C1'] || 'Kalah SF 1', matchLosers['C2'] || 'Kalah SF 2');
+            document.getElementById('name-W3').innerText = r3.winner || 'Pemenang Match Juara 3';
+
+            drawLines();
+        }
+
+        function handleScoreInput() {
+            saveToLocalStorage();
+            updateBracket();
+        }
+
+        function drawLines() {
+            const svg = document.getElementById('svg-canvas');
+            const wrapper = document.getElementById('bracket-wrapper');
+            svg.setAttribute('width', wrapper.scrollWidth);
+            svg.setAttribute('height', wrapper.scrollHeight);
+            svg.innerHTML = '';
+
+            const connections = [
+                ['card-A0', 'card-B1', 'top'],
+                ['card-A1', 'card-B1', 'bottom'],
+                ['card-A2', 'card-B2', 'top'],
+                ['card-A3', 'card-B2', 'bottom'],
+                ['card-A4', 'card-B3', 'top'],
+                ['card-A5', 'card-B3', 'bottom'],
+                ['card-A6', 'card-B4', 'top'],
+                ['card-A7', 'card-B4', 'bottom'],
+                ['card-B1', 'card-C1', 'top'],
+                ['card-B2', 'card-C1', 'bottom'],
+                ['card-B3', 'card-C2', 'top'],
+                ['card-B4', 'card-C2', 'bottom'],
+                ['card-C1', 'card-F1', 'top'],
+                ['card-C2', 'card-F1', 'bottom'],
+                ['card-F1', 'card-W1', 'single']
+            ];
+
+            const wrapperRect = wrapper.getBoundingClientRect();
+
+            connections.forEach(([fromId, toId, targetPosition]) => {
+                const fromEl = document.getElementById(fromId);
+                const toEl = document.getElementById(toId);
+
+                if (!fromEl || !toEl) return;
+
+                const rFrom = fromEl.getBoundingClientRect();
+                const rTo = toEl.getBoundingClientRect();
+
+                const x1 = rFrom.right - wrapperRect.left;
+                const y1 = rFrom.top + rFrom.height / 2 - wrapperRect.top;
+
+                const x2 = rTo.left - wrapperRect.left;
+                let y2 = rTo.top + rTo.height / 2 - wrapperRect.top;
+
+                if (targetPosition === 'top') {
+                    y2 = rTo.top + (rTo.height * 0.25) - wrapperRect.top;
+                } else if (targetPosition === 'bottom') {
+                    y2 = rTo.top + (rTo.height * 0.75) - wrapperRect.top;
+                }
+
+                const midX = x1 + (x2 - x1) / 2;
+                const pathData = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('stroke', '#0284c7');
+                path.setAttribute('stroke-width', '2');
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke-linecap', 'round');
+                path.setAttribute('stroke-linejoin', 'round');
+
+                svg.appendChild(path);
+            });
+        }
+
+        function resetScores() {
+            if (confirm("Apakah Anda yakin ingin mereset seluruh skor?")) {
+                localStorage.removeItem('pingpong_scores_up2d_2026');
+                document.querySelectorAll('.score-input').forEach(input => input.value = '');
+                updateBracket();
+            }
+        }
+
+        window.addEventListener('resize', drawLines);
+        window.addEventListener('load', () => {
+            loadFromLocalStorage();
+            updateBracket();
+        });
+    </script>
+</body>
+</html>
